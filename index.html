@@ -640,26 +640,27 @@
             botao.disabled = isDisabled;
         }
 
-        async function carregarDadosDaPlanilha() {
-            if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbwEF1Z5ISnkfls6uSU7Hb3A9SgA3oHT5wsOVU0Ij3sCxZGHE-5GdB7BQ4s6BraNDUhPjA/exec") {
+  async function carregarDadosDaPlanilha() {
+            if (SCRIPT_URL === "") {
                 alert("Por favor, configure sua URL do Google Script antes de começar!");
                 return;
             }
             mostrarLoader("🔄 Buscando dados da Planilha Google...");
             try {
-                // Adiciona marcação de tempo para ignorar o cache do navegador e do Google
                 const urlSemCache = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
-                const response = await fetch(urlSemCache);
+                
+                // Força o navegador a fazer uma requisição limpa sem travar em segurança de CORS
+                const response = await fetch(urlSemCache, { method: 'GET', mode: 'cors' });
                 const dados = await response.json();
 
-                // Padroniza as datas para o formato esperado pelo filtro do app (YYYY-MM-DD)
-                rotas = (dados.rotas || []).filter(r => r.date).map(r => {
-                    let d = r.date.split('T')[0].replace(/\//g, '-');
+                // Garante que o app entenda formatos diferentes de data (ex: 2026-05-24 ou 24/05/2026)
+                rotas = (dados.rotas || []).map(r => {
+                    let d = String(r.date).split('T')[0].replace(/\//g, '-');
                     return { ...r, date: d };
                 });
                 
-                abastecimentos = (dados.abastecimentos || []).filter(a => a.date).map(a => {
-                    let d = a.date.split('T')[0].replace(/\//g, '-');
+                abastecimentos = (dados.abastecimentos || []).map(a => {
+                    let d = String(a.date).split('T')[0].replace(/\//g, '-');
                     return { ...a, date: d };
                 });
 
@@ -668,8 +669,8 @@
 
                 atualizarTela();
             } catch (error) {
-                console.error(error);
-                alert("Erro ao ler dados da planilha remota.");
+                console.error("Erro na leitura:", error);
+                alert("Erro ao ler dados da planilha remota. Verifique a implantação do script.");
             } finally {
                 ocultarLoader();
             }
