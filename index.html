@@ -35,7 +35,8 @@
         .container {
             max-width: 1100px;
             margin: 0 auto;
-            display: none; /* Oculto até que o login seja feito com sucesso */
+            display: none;
+            /* Oculto até que o login seja feito com sucesso */
         }
 
         header {
@@ -396,7 +397,7 @@
             width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.8);
-            display: none; /* Controlado dinamicamente via JS */
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -522,7 +523,7 @@
                             <input type="number" id="hours" step="0.1" placeholder="0.0" disabled required>
                         </div>
                     </div>
-                    
+
                     <button type="submit" id="btnSalvarRota" disabled>Salvar Rota na Planilha</button>
                 </form>
             </div>
@@ -599,12 +600,11 @@
         document.getElementById('filtroAno').value = anoAtual;
 
         // Gerenciador do Formulário de Login Inicial
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const usuarioDigitado = document.getElementById('username').value;
             const senhaDigitada = document.getElementById('password').value;
 
-            // Altere o usuário ("admin") e a senha ("1234") abaixo se desejar
             if (usuarioDigitado === "admin" && senhaDigitada === "1234") {
                 document.getElementById('loginOverlay').style.display = "none";
                 document.getElementById('mainContainer').style.display = "block";
@@ -640,28 +640,25 @@
             botao.disabled = isDisabled;
         }
 
-  function carregarDadosDaPlanilha() {
+        // LEITURA DOS DADOS (Via técnica JSONP infalível contra CORS)
+        function carregarDadosDaPlanilha() {
             if (SCRIPT_URL === "") {
                 alert("Por favor, configure sua URL do Google Script antes de começar!");
                 return;
             }
             mostrarLoader("🔄 Buscando dados da Planilha Google...");
             
-            // Remove qualquer callback antigo se houver
             const scriptAntigo = document.getElementById('jsonpScript');
             if (scriptAntigo) scriptAntigo.remove();
 
-            // Cria um elemento dinâmico para puxar os dados burlando o bloqueio de CORS do Google
             const callbackName = 'parsePlanilhaDados_' + new Date().getTime();
             
             window[callbackName] = function(dados) {
-                // Processa as rotas recebidas
                 rotas = (dados.rotas || []).map(r => {
                     let d = String(r.date).split('T')[0].replace(/\//g, '-');
                     return { ...r, date: d };
                 });
                 
-                // Processa os abastecimentos recebidos
                 abastecimentos = (dados.abastecimentos || []).map(a => {
                     let d = String(a.date).split('T')[0].replace(/\//g, '-');
                     return { ...a, date: d };
@@ -673,7 +670,6 @@
                 atualizarTela();
                 ocultarLoader();
                 
-                // Limpeza do escopo global
                 delete window[callbackName];
                 document.getElementById('jsonpScript').remove();
             };
@@ -690,3 +686,156 @@
             
             document.body.appendChild(scriptTag);
         }
+
+        // CORREÇÃO: GRAVAÇÃO DA ROTA (Utilizando no-cors adequado para o Apps Script)
+        document.getElementById('routeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            mostrarLoader("🚀 Gravando rota na planilha...");
+
+            const payload = {
+                action: "salvarRota",
+                data: {
+                    date: document.getElementById('routeDate').value,
+                    platform: document.getElementById('platform').value,
+                    value: parseFloat(document.getElementById('value').value),
+                    km: parseFloat(document.getElementById('km').value),
+                    stops: parseInt(document.getElementById('stops').value),
+                    hours: parseFloat(document.getElementById('hours').value)
+                }
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Evita o travamento de CORS no envio
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Limpa o formulário e recarrega a tela forçando a leitura nova
+                document.getElementById('routeForm').reset();
+                gerenciarCamposRota();
+                setTimeout(carregarDadosDaPlanilha, 1500); // Aguarda 1.5s para o Google processar
+            } catch (error) {
+                ocultarLoader();
+                alert("Erro ao enviar rota.");
+                console.error(error);
+            }
+        });
+
+        // CORREÇÃO: GRAVAÇÃO DO ABASTECIMENTO (Utilizando no-cors adequado)
+        document.getElementById('fuelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            mostrarLoader("⛽ Gravando abastecimento na planilha...");
+
+            const payload = {
+                action: "salvarAbastecimento",
+                data: {
+                    date: document.getElementById('fuelDate').value,
+                    fuelValue: parseFloat(document.getElementById('fuelValue').value),
+                    liters: parseFloat(document.getElementById('liters').value)
+                }
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                document.getElementById('fuelForm').reset();
+                setTimeout(carregarDadosDaPlanilha, 1500);
+            } catch (error) {
+                ocultarLoader();
+                alert("Erro ao enviar abastecimento.");
+                console.error(error);
+            }
+        });
+
+        // ATUALIZAR INTERFACE (Tabelas, Filtros e Painéis)
+        function atualizarTela() {
+            const mesSel = document.getElementById('filtroMes').value;
+            const anoSel = document.getElementById('filtroAno').value;
+
+            // Filtra as rotas pelo mês e ano selecionados
+            const rotasFiltradas = rotas.filter(r => {
+                const partes = r.date.split('-');
+                return partes[0] === anoSel && partes[1] === mesSel;
+            });
+
+            // Filtra os abastecimentos pelo mês e ano selecionados
+            const abastFiltrados = abastecimentos.filter(a => {
+                const partes = a.date.split('-');
+                return partes[0] === anoSel && partes[1] === mesSel;
+            });
+
+            // Calcula indicadores do Dashboard
+            let faturamentoBruto = 0;
+            let totalKmNoMes = 0;
+            rotasFiltradas.forEach(r => {
+                faturamentoBruto += r.value;
+                totalKmNoMes += r.km;
+            });
+
+            let custoCombustivel = 0;
+            let totalLitrosNoMes = 0;
+            abastFiltrados.forEach(a => {
+                custoCombustivel += a.fuelValue;
+                totalLitrosNoMes += a.liters;
+            });
+
+            let lucroLiquido = faturamentoBruto - custoCombustivel;
+            let mediaConsumo = totalLitrosNoMes > 0 ? (totalKmNoMes / totalLitrosNoMes) : 0;
+
+            // Renderiza no HTML
+            document.getElementById('resumoBruto').innerText = faturamentoBruto.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('resumoGastos').innerText = custoCombustivel.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('resumoLiquido').innerText = lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('resumoKML').innerHTML = `${mediaConsumo.toFixed(1)} <span style="font-size: 14px;">km/l</span>`;
+            document.getElementById('totalKM').innerText = totalKmNoMes.toFixed(0);
+            document.getElementById('totalLitros').innerText = totalLitrosNoMes.toFixed(0);
+
+            // Preenche Tabela de Rotas
+            const tbodyRotas = document.getElementById('routeTableBody');
+            tbodyRotas.innerHTML = '';
+            if (rotasFiltradas.length === 0) {
+                tbodyRotas.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Nenhuma rota encontrada neste período.</td></tr>';
+            } else {
+                rotasFiltradas.forEach(r => {
+                    const badgeClass = r.platform === 'Amazon' ? 'badge-amazon' : 'badge-ml';
+                    tbodyRotas.innerHTML += `
+                        <tr>
+                            <td><b>${formatarData(r.date)}</b></td>
+                            <td><span class="badge ${badgeClass}">${r.platform}</span></td>
+                            <td>R$ ${r.value.toFixed(2)}</td>
+                            <td>${r.km.toFixed(1)} km</td>
+                            <td>${r.stops} un</td>
+                            <td>${r.hours.toFixed(1)}h</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Preenche Tabela de Abastecimentos
+            const tbodyAbast = document.getElementById('fuelTableBody');
+            tbodyAbast.innerHTML = '';
+            if (abastFiltrados.length === 0) {
+                tbodyAbast.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Nenhum abastecimento encontrado.</td></tr>';
+            } else {
+                abastFiltrados.forEach(a => {
+                    tbodyAbast.innerHTML += `
+                        <tr>
+                            <td><b>${formatarData(a.date)}</b></td>
+                            <td>R$ ${a.fuelValue.toFixed(2)}</td>
+                            <td>${a.liters.toFixed(2)} L</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
