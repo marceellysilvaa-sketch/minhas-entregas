@@ -641,14 +641,16 @@
         }
 
         async function carregarDadosDaPlanilha() {
-            if (SCRIPT_URL === "") {
-                alert("Por favor, configure sua URL do Google Script antes de começar!");
-                return;
-            }
-            mostrarLoader("🔄 Buscando dados da Planilha Google...");
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const dados = await response.json();
+        if (SCRIPT_URL === "") {
+        alert("Por favor, configure sua URL do Google Script antes de começar!");
+        return;
+        }
+        mostrarLoader("🔄 Buscando dados da Planilha Google...");
+        try {
+        // Adiciona um identificador único para burlar o cache do Google
+        const urlComCacheBuster = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+        const response = await fetch(urlComCacheBuster);
+        const dados = await response.json();
 
                 rotas = (dados.rotas || []).filter(r => r.date).map(r => ({ ...r, date: r.date.split('T')[0] }));
                 abastecimentos = (dados.abastecimentos || []).filter(a => a.date).map(a => ({ ...a, date: a.date.split('T')[0] }));
