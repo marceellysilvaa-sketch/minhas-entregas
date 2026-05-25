@@ -1,4 +1,4 @@
-<!DOCTYPE Html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -7,7 +7,7 @@
     <title>Minhas Entregas - Controle Mensal Compartilhado</title>
     <style>
         :root {
-            --primary - color: #1a237e;
+            --primary-color: #1a237e;
             --accent-amazon: #ff9900;
             --accent-ml: #fff159;
             --success-color: #2e7d32;
@@ -19,26 +19,27 @@
         }
 
         * {
-            box - sizing: border-box;
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background - color: var(--bg-color);
+            background-color: var(--bg-color);
             color: var(--text-main);
             padding: 15px;
             line-height: 1.5;
         }
 
         .container {
-            max - width: 1100px;
+            max-width: 1100px;
             margin: 0 auto;
+            display: none; /* Oculto até que o login seja feito com sucesso */
         }
 
         header {
-            text - align: center;
+            text-align: center;
             margin-bottom: 20px;
             padding: 20px 15px;
             background: var(--primary-color);
@@ -48,15 +49,88 @@
         }
 
         header h1 {
-            font - size: 24px;
+            font-size: 24px;
             letter-spacing: 0.5px;
         }
 
         header p {
-            font - size: 13px;
+            font-size: 13px;
             opacity: 0.9;
             margin-top: 5px;
         }
+
+        /* Tela de Login */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 22px;
+        }
+
+        .login-card p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .login-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .login-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+
+        .login-card input {
+            width: 100%;
+            height: 42px;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .login-card button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Fim Tela de Login */
 
         .periodo-seletor {
             background: #e2e8f0;
@@ -72,8 +146,8 @@
         }
 
         @media (min-width: 480px) {
-            .periodo - seletor {
-                flex - direction: row;
+            .periodo-seletor {
+                flex-direction: row;
                 gap: 20px;
             }
         }
@@ -87,7 +161,7 @@
         }
 
         .periodo-seletor label {
-            font - size: 15px;
+            font-size: 15px;
             font-weight: bold;
             margin-bottom: 4px;
             color: var(--text-main);
@@ -122,31 +196,31 @@
         }
 
         .dash-card.gasto {
-            border - left - color: var(--danger-color);
+            border-left-color: var(--danger-color);
         }
 
         .dash-card.lucro {
-            border - left - color: var(--success-color);
+            border-left-color: var(--success-color);
         }
 
         .dash-card.info {
-            border - left - color: #2980b9;
+            border-left-color: #2980b9;
         }
 
         .dash-card h3 {
-            font - size: 12px;
+            font-size: 12px;
             text-transform: uppercase;
             color: var(--text-muted);
             margin-bottom: 5px;
         }
 
         .dash-card p {
-            font - size: 22px;
+            font-size: 22px;
             font-weight: bold;
         }
 
         .dash-card .sub-info {
-            font - size: 11px;
+            font-size: 11px;
             color: var(--text-muted);
             font-weight: normal;
             margin-top: 4px;
@@ -160,8 +234,8 @@
         }
 
         @media (min-width: 768px) {
-            .forms - wrapper {
-                grid - template - columns: 1fr 1fr;
+            .forms-wrapper {
+                grid-template-columns: 1fr 1fr;
             }
         }
 
@@ -174,7 +248,7 @@
         }
 
         .panel h2 {
-            font - size: 18px;
+            font-size: 18px;
             margin-bottom: 15px;
             padding-bottom: 5px;
             border-bottom: 2px solid #ecf0f1;
@@ -189,12 +263,12 @@
         }
 
         .form-group {
-            margin - bottom: 12px;
+            margin-bottom: 12px;
             width: 100%;
         }
 
         .form-group.full-width {
-            grid - column: span 2;
+            grid-column: span 2;
         }
 
         label {
@@ -225,14 +299,14 @@
         input:disabled,
         select:disabled,
         button:disabled {
-            background - color: #f1f5f9;
+            background-color: #f1f5f9;
             color: #94a3b8;
             cursor: not-allowed;
             opacity: 0.7;
         }
 
         select {
-            background - image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3l4 4 4-4' stroke='%237f8c8d' stroke-width='2' fill='none' stroke-linecap='round' /></svg>");
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M1 3l4 4 4-4' stroke='%237f8c8d' stroke-width='2' fill='none' stroke-linecap='round' /></svg>");
             background-repeat: no-repeat;
             background-position: right 10px center;
             padding-right: 30px;
@@ -272,7 +346,7 @@
         }
 
         .table-container h2 {
-            font - size: 16px;
+            font-size: 16px;
             margin-bottom: 12px;
             color: var(--text-main);
         }
@@ -292,7 +366,7 @@
         }
 
         th {
-            background - color: #f8fafc;
+            background-color: #f8fafc;
             color: #64748b;
             font-weight: 600;
         }
@@ -306,16 +380,15 @@
         }
 
         .badge-amazon {
-            background - color: #ffe8cc;
+            background-color: #ffe8cc;
             color: #d47a00;
         }
 
         .badge-ml {
-            background - color: #fffbc4;
+            background-color: #fffbc4;
             color: #8a7300;
         }
 
-        /* Loader para indicar carregamento da planilha */
         #loadingOverlay {
             position: fixed;
             top: 0;
@@ -323,7 +396,7 @@
             width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.8);
-            display: flex;
+            display: none; /* Controlado dinamicamente via JS */
             justify-content: center;
             align-items: center;
             z-index: 9999;
@@ -336,9 +409,27 @@
 
 <body>
 
+    <div id="loginOverlay">
+        <div class="login-card">
+            <h2>Acesso Restrito</h2>
+            <p>Insira suas credenciais para visualizar o painel</p>
+            <form id="loginForm">
+                <div class="login-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" placeholder="Digite seu usuário" required>
+                </div>
+                <div class="login-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" placeholder="Digite sua senha" required>
+                </div>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+    </div>
+
     <div id="loadingOverlay">🔄 Sincronizando com a Planilha Google...</div>
 
-    <div class="container">
+    <div class="container" id="mainContainer">
         <header>
             <h1>Minhas Entregas</h1>
             <p>Painel Compartilhado Conectado ao Google Planilhas</p>
@@ -431,6 +522,7 @@
                             <input type="number" id="hours" step="0.1" placeholder="0.0" disabled required>
                         </div>
                     </div>
+                    
                     <button type="submit" id="btnSalvarRota" disabled>Salvar Rota na Planilha</button>
                 </form>
             </div>
@@ -494,7 +586,6 @@
     </div>
 
     <script>
-        // ⚠️ SUBSTITUA O LINK ABAIXO COM A SUA URL GERADA NO PASSO 2
         const SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnT7OQjnjOv2Seod3r8Ma4ijK9fewG4G-EtCPijDqJrkNU6Excai3IfE8e27gM7pUhI8_H0PfELqYsMIu-qOFugYXu-MeGJ5phCfpVFiuriX6DwlFJf-rT_7KwNZQqLDjafQunpAxMXbKkuWSMh9p2AW6Mnez2QniM92Fg97SjKmPZw1mJlBUopDvml_RBRDo7dHsKP0flol5MMRAo_DxfUjKd9tYfGsTrQWyYM92bYLyZdiZW9Y_r_pl_R-bW_9oL_jqyShkEQ2WaD9eap3hJMKnDAXJg&lib=McRKhre1vqy4MQ6dk98yYo6HjSm6R_L-6";
 
         let rotas = [];
@@ -506,6 +597,22 @@
 
         document.getElementById('filtroMes').value = mesAtual;
         document.getElementById('filtroAno').value = anoAtual;
+
+        // Gerenciador do Formulário de Login Inicial
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const usuarioDigitado = document.getElementById('username').value;
+            const senhaDigitada = document.getElementById('password').value;
+
+            // Altere o usuário ("admin") e a senha ("1234") abaixo se desejar
+            if (usuarioDigitado === "admin" && senhaDigitada === "1234") {
+                document.getElementById('loginOverlay').style.display = "none";
+                document.getElementById('mainContainer').style.display = "block";
+                carregarDadosDaPlanilha(); // Só puxa os dados após o login bem-sucedido
+            } else {
+                alert("Usuário ou senha incorretos! Tente novamente.");
+            }
+        });
 
         function mostrarLoader(texto) {
             const loader = document.getElementById('loadingOverlay');
@@ -533,9 +640,8 @@
             botao.disabled = isDisabled;
         }
 
-        // Puxa os dados atualizados da Planilha Google
         async function carregarDadosDaPlanilha() {
-            if (SCRIPT_URL === "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTLj1EPtlSiUAfoKlizRZPTamXhqQrRYYFd8uAMHXAuhUh1NbyE8v23uMfPwH4lG_LrCiom18WbKL2WauftovaQ3b3l1Y9_GeyEJDN0H-aI6hzKX2H5j_z_KgTWiMkg6Sulu0eTSCTYj7c9lbJ5YqSN0Pf8-iegx-mgBquuVUMq6TH641dgTYKSGNScQ8Ze1MMCsMj6dAtA_zgplsQluYlvhnE3o9VXmqRoS3z22byvpnl6AuG0hBvS-XRI9vmuJ3LpVP1cjbbQhsOd-BtabrjOVvyfmg&lib=McRKhre1vqy4MQ6dk98yYo6HjSm6R_L-6") {
+            if (SCRIPT_URL === "") {
                 alert("Por favor, configure sua URL do Google Script antes de começar!");
                 return;
             }
@@ -544,11 +650,9 @@
                 const response = await fetch(SCRIPT_URL);
                 const dados = await response.json();
 
-                // Tratamento das datas que vem da planilha
                 rotas = (dados.rotas || []).filter(r => r.date).map(r => ({ ...r, date: r.date.split('T')[0] }));
                 abastecimentos = (dados.abastecimentos || []).filter(a => a.date).map(a => ({ ...a, date: a.date.split('T')[0] }));
 
-                // Ordenar por data decrescente (mais recente primeiro)
                 rotas.sort((a, b) => b.date.localeCompare(a.date));
                 abastecimentos.sort((a, b) => b.date.localeCompare(a.date));
 
@@ -647,7 +751,7 @@
                     document.getElementById('filtroAno').value = ano;
                     document.getElementById('routeForm').reset();
                     gerenciarCamposRota();
-                    await carregarDadosDaPlanilha(); // Recarrega os dados atualizados
+                    await carregarDadosDaPlanilha();
                 } else {
                     alert("Erro ao salvar: " + res.message);
                 }
@@ -681,7 +785,7 @@
                     document.getElementById('filtroMes').value = mes;
                     document.getElementById('filtroAno').value = ano;
                     document.getElementById('fuelForm').reset();
-                    await carregarDadosDaPlanilha(); // Recarrega os dados atualizados
+                    await carregarDadosDaPlanilha();
                 } else {
                     alert("Erro ao salvar: " + res.message);
                 }
@@ -692,8 +796,7 @@
             }
         });
 
-        // Inicia buscando as informações da planilha
-        carregarDadosDaPlanilha();
+        // Removido o carregamento automático inicial para que espere o login ser feito com sucesso
     </script>
 </body>
 
