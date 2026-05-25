@@ -640,25 +640,28 @@
             botao.disabled = isDisabled;
         }
 
-  async function carregarDadosDaPlanilha() {
+  function carregarDadosDaPlanilha() {
             if (SCRIPT_URL === "") {
                 alert("Por favor, configure sua URL do Google Script antes de começar!");
                 return;
             }
             mostrarLoader("🔄 Buscando dados da Planilha Google...");
-            try {
-                const urlSemCache = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
-                
-                // Força o navegador a fazer uma requisição limpa sem travar em segurança de CORS
-                const response = await fetch(urlSemCache, { method: 'GET', mode: 'cors' });
-                const dados = await response.json();
+            
+            // Remove qualquer callback antigo se houver
+            const scriptAntigo = document.getElementById('jsonpScript');
+            if (scriptAntigo) scriptAntigo.remove();
 
-                // Garante que o app entenda formatos diferentes de data (ex: 2026-05-24 ou 24/05/2026)
+            // Cria um elemento dinâmico para puxar os dados burlando o bloqueio de CORS do Google
+            const callbackName = 'parsePlanilhaDados_' + new Date().getTime();
+            
+            window[callbackName] = function(dados) {
+                // Processa as rotas recebidas
                 rotas = (dados.rotas || []).map(r => {
                     let d = String(r.date).split('T')[0].replace(/\//g, '-');
                     return { ...r, date: d };
                 });
                 
+                // Processa os abastecimentos recebidos
                 abastecimentos = (dados.abastecimentos || []).map(a => {
                     let d = String(a.date).split('T')[0].replace(/\//g, '-');
                     return { ...a, date: d };
@@ -668,147 +671,22 @@
                 abastecimentos.sort((a, b) => b.date.localeCompare(a.date));
 
                 atualizarTela();
-            } catch (error) {
-                console.error("Erro na leitura:", error);
-                alert("Erro ao ler dados da planilha remota. Verifique a implantação do script.");
-            } finally {
                 ocultarLoader();
-            }
-        }
-
-        function atualizarTela() {
-            const mesSelecionado = document.getElementById('filtroMes').value;
-            const anoSelecionado = document.getElementById('filtroAno').value;
-
-            let totalFaturamento = 0;
-            let totalCombustivelGasto = 0;
-            let totalKmRodado = 0;
-            let totalLitrosAbastecidos = 0;
-
-            document.getElementById('routeTableBody').innerHTML = '';
-            document.getElementById('fuelTableBody').innerHTML = '';
-
-            rotas.forEach(r => {
-                const [ano, mes] = r.date.split('-');
-                if (mes === mesSelecionado && ano === anoSelecionado) {
-                    totalFaturamento += r.value;
-                    totalKmRodado += r.km;
-                    const badgeClass = r.platform === 'Amazon' ? 'badge-amazon' : 'badge-ml';
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-            <td>${formatarData(r.date)}</td>
-            <td><span class="badge ${badgeClass}">${r.platform}</span></td>
-            <td style="font-weight: 600; color: var(--success-color);">R$ ${r.value.toFixed(2).replace('.', ',')}</td>
-            <td>${r.km} km</td>
-            <td>${r.stops}</td>
-            <td>${r.hours}h</td>
-            `;
-                    document.getElementById('routeTableBody').appendChild(row);
-                }
-            });
-
-            abastecimentos.forEach(a => {
-                const [ano, mes] = a.date.split('-');
-                if (mes === mesSelecionado && ano === anoSelecionado) {
-                    totalCombustivelGasto += a.fuelValue;
-                    totalLitrosAbastecidos += a.liters;
-
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-            <td>${formatarData(a.date)}</td>
-            <td style="font-weight: 600; color: var(--danger-color);">R$ ${a.fuelValue.toFixed(2).replace('.', ',')}</td>
-            <td>${a.liters.toFixed(2).replace('.', ',')} L</td>
-            `;
-                    document.getElementById('fuelTableBody').appendChild(row);
-                }
-            });
-
-            const lucroLiquido = totalFaturamento - totalCombustivelGasto;
-            let mediaKML = totalLitrosAbastecidos > 0 ? totalKmRodado / totalLitrosAbastecidos : 0;
-
-            document.getElementById('resumoBruto').innerText = totalFaturamento.toFixed(2).replace('.', ',');
-            document.getElementById('resumoGastos').innerText = totalCombustivelGasto.toFixed(2).replace('.', ',');
-            document.getElementById('resumoLiquido').innerText = lucroLiquido.toFixed(2).replace('.', ',');
-            document.getElementById('resumoKML').innerHTML = `${mediaKML.toFixed(1).replace('.', ',')} <span style="font-size: 14px;">km/l</span>`;
-            document.getElementById('totalKM').innerText = totalKmRodado.toFixed(1).replace('.', ',');
-            document.getElementById('totalLitros').innerText = totalLitrosAbastecidos.toFixed(1).replace('.', ',');
-        }
-
-        document.getElementById('routeForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const dataRota = document.getElementById('routeDate').value;
-            const [ano, mes] = dataRota.split('-');
-
-            const novaRota = {
-                date: dataRota,
-                platform: document.getElementById('platform').value,
-                value: parseFloat(document.getElementById('value').value),
-                km: parseFloat(document.getElementById('km').value),
-                stops: parseInt(document.getElementById('stops').value),
-                hours: parseFloat(document.getElementById('hours').value)
+                
+                // Limpeza do escopo global
+                delete window[callbackName];
+                document.getElementById('jsonpScript').remove();
             };
 
-            mostrarLoader("💾 Gravando rota na planilha...");
-
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "salvarRota", data: novaRota })
-                });
-                const res = await response.json();
-                if (res.status === "success") {
-                    document.getElementById('filtroMes').value = mes;
-                    document.getElementById('filtroAno').value = ano;
-                    document.getElementById('routeForm').reset();
-                    gerenciarCamposRota();
-                    await carregarDadosDaPlanilha();
-                } else {
-                    alert("Erro ao salvar: " + res.message);
-                }
-            } catch (error) {
-                alert("Erro de conexão ao salvar rota.");
-            } finally {
+            const srcUrl = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 'callback=' + callbackName + '&t=' + new Date().getTime();
+            
+            const scriptTag = document.createElement('script');
+            scriptTag.id = 'jsonpScript';
+            scriptTag.src = srcUrl;
+            scriptTag.onerror = function() {
                 ocultarLoader();
-            }
-        });
-
-        document.getElementById('fuelForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const dataAbast = document.getElementById('fuelDate').value;
-            const [ano, mes] = dataAbast.split('-');
-
-            const novoAbast = {
-                date: dataAbast,
-                fuelValue: parseFloat(document.getElementById('fuelValue').value),
-                liters: parseFloat(document.getElementById('liters').value)
+                alert("Erro ao conectar com o servidor da planilha. Verifique seu SCRIPT_URL.");
             };
-
-            mostrarLoader("💾 Gravando abastecimento na planilha...");
-
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "salvarAbastecimento", data: novoAbast })
-                });
-                const res = await response.json();
-                if (res.status === "success") {
-                    document.getElementById('filtroMes').value = mes;
-                    document.getElementById('filtroAno').value = ano;
-                    document.getElementById('fuelForm').reset();
-                    await carregarDadosDaPlanilha();
-                } else {
-                    alert("Erro ao salvar: " + res.message);
-                }
-            } catch (error) {
-                alert("Erro de conexão ao salvar abastecimento.");
-            } finally {
-                ocultarLoader();
-            }
-        });
-
-        // Removido o carregamento automático inicial para que espere o login ser feito com sucesso
-    </script>
-</body>
-
-</html>
+            
+            document.body.appendChild(scriptTag);
+        }
