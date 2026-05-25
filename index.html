@@ -641,19 +641,27 @@
         }
 
         async function carregarDadosDaPlanilha() {
-        if (SCRIPT_URL === "") {
-        alert("Por favor, configure sua URL do Google Script antes de começar!");
-        return;
-        }
-        mostrarLoader("🔄 Buscando dados da Planilha Google...");
-        try {
-        // Adiciona um identificador único para burlar o cache do Google
-        const urlComCacheBuster = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
-        const response = await fetch(urlComCacheBuster);
-        const dados = await response.json();
+            if (SCRIPT_URL === "") {
+                alert("Por favor, configure sua URL do Google Script antes de começar!");
+                return;
+            }
+            mostrarLoader("🔄 Buscando dados da Planilha Google...");
+            try {
+                // Adiciona marcação de tempo para ignorar o cache do navegador e do Google
+                const urlSemCache = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+                const response = await fetch(urlSemCache);
+                const dados = await response.json();
 
-                rotas = (dados.rotas || []).filter(r => r.date).map(r => ({ ...r, date: r.date.split('T')[0] }));
-                abastecimentos = (dados.abastecimentos || []).filter(a => a.date).map(a => ({ ...a, date: a.date.split('T')[0] }));
+                // Padroniza as datas para o formato esperado pelo filtro do app (YYYY-MM-DD)
+                rotas = (dados.rotas || []).filter(r => r.date).map(r => {
+                    let d = r.date.split('T')[0].replace(/\//g, '-');
+                    return { ...r, date: d };
+                });
+                
+                abastecimentos = (dados.abastecimentos || []).filter(a => a.date).map(a => {
+                    let d = a.date.split('T')[0].replace(/\//g, '-');
+                    return { ...a, date: d };
+                });
 
                 rotas.sort((a, b) => b.date.localeCompare(a.date));
                 abastecimentos.sort((a, b) => b.date.localeCompare(a.date));
