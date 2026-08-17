@@ -8,7 +8,7 @@
     <style>
         :root {
             --primary-color: #1a237e;
-            --accent-amazon: #ff9900;
+            --accent-uber: #000000;
             --accent-ml: #fff159;
             --success-color: #2e7d32;
             --danger-color: #c62828;
@@ -36,7 +36,6 @@
             max-width: 1100px;
             margin: 0 auto;
             display: none;
-            /* Oculto até que o login seja feito com sucesso */
         }
 
         header {
@@ -130,8 +129,6 @@
             width: 100%;
             margin-top: 10px;
         }
-
-        /* Fim Tela de Login */
 
         .periodo-seletor {
             background: #e2e8f0;
@@ -380,14 +377,31 @@
             display: inline-block;
         }
 
-        .badge-amazon {
-            background-color: #ffe8cc;
-            color: #d47a00;
+        .badge-uber {
+            background-color: #e2e8f0;
+            color: #000000;
         }
 
         .badge-ml {
             background-color: #fffbc4;
             color: #8a7300;
+        }
+
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            height: auto;
+            width: auto;
+            margin-top: 0;
+        }
+
+        .btn-delete:hover {
+            opacity: 0.8;
         }
 
         #loadingOverlay {
@@ -498,7 +512,7 @@
                             <label for="platform">Plataforma</label>
                             <select id="platform" onchange="gerenciarCamposRota()" required>
                                 <option value="" selected disabled>Selecionar</option>
-                                <option value="Amazon">Amazon Flex</option>
+                                <option value="Uber">Uber</option>
                                 <option value="Mercado Livre">Mercado Livre</option>
                             </select>
                         </div>
@@ -564,6 +578,7 @@
                             <th>Distância</th>
                             <th>Paradas</th>
                             <th>Duração</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="routeTableBody"></tbody>
@@ -578,6 +593,7 @@
                             <th>Data de Abastecimento</th>
                             <th>Custo Total</th>
                             <th>Volume Injetado</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="fuelTableBody"></tbody>
@@ -608,7 +624,7 @@
             if (usuarioDigitado === "admin" && senhaDigitada === "1234") {
                 document.getElementById('loginOverlay').style.display = "none";
                 document.getElementById('mainContainer').style.display = "block";
-                carregarDadosDaPlanilha(); // Só puxa os dados após o login bem-sucedido
+                carregarDadosDaPlanilha();
             } else {
                 alert("Usuário ou senha incorretos! Tente novamente.");
             }
@@ -640,7 +656,7 @@
             botao.disabled = isDisabled;
         }
 
-        // LEITURA DOS DADOS (Via técnica JSONP infalível contra CORS)
+        // LEITURA DOS DADOS (Via técnica JSONP)
         function carregarDadosDaPlanilha() {
             if (SCRIPT_URL === "") {
                 alert("Por favor, configure sua URL do Google Script antes de começar!");
@@ -654,14 +670,14 @@
             const callbackName = 'parsePlanilhaDados_' + new Date().getTime();
             
             window[callbackName] = function(dados) {
-                rotas = (dados.rotas || []).map(r => {
+                rotas = (dados.rotas || []).map((r, index) => {
                     let d = String(r.date).split('T')[0].replace(/\//g, '-');
-                    return { ...r, date: d };
+                    return { ...r, id: r.id || index, date: d };
                 });
                 
-                abastecimentos = (dados.abastecimentos || []).map(a => {
+                abastecimentos = (dados.abastecimentos || []).map((a, index) => {
                     let d = String(a.date).split('T')[0].replace(/\//g, '-');
-                    return { ...a, date: d };
+                    return { ...a, id: a.id || index, date: d };
                 });
 
                 rotas.sort((a, b) => b.date.localeCompare(a.date));
@@ -671,7 +687,9 @@
                 ocultarLoader();
                 
                 delete window[callbackName];
-                document.getElementById('jsonpScript').remove();
+                if (document.getElementById('jsonpScript')) {
+                    document.getElementById('jsonpScript').remove();
+                }
             };
 
             const srcUrl = SCRIPT_URL + (SCRIPT_URL.includes('?') ? '&' : '?') + 'callback=' + callbackName + '&t=' + new Date().getTime();
@@ -687,7 +705,7 @@
             document.body.appendChild(scriptTag);
         }
 
-        // CORREÇÃO: GRAVAÇÃO DA ROTA (Utilizando no-cors adequado para o Apps Script)
+        // GRAVAÇÃO DA ROTA
         document.getElementById('routeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             mostrarLoader("🚀 Gravando rota na planilha...");
@@ -707,15 +725,14 @@
             try {
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Evita o travamento de CORS no envio
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 
-                // Limpa o formulário e recarrega a tela forçando a leitura nova
                 document.getElementById('routeForm').reset();
                 gerenciarCamposRota();
-                setTimeout(carregarDadosDaPlanilha, 1500); // Aguarda 1.5s para o Google processar
+                setTimeout(carregarDadosDaPlanilha, 1500);
             } catch (error) {
                 ocultarLoader();
                 alert("Erro ao enviar rota.");
@@ -723,7 +740,7 @@
             }
         });
 
-        // CORREÇÃO: GRAVAÇÃO DO ABASTECIMENTO (Utilizando no-cors adequado)
+        // GRAVAÇÃO DO ABASTECIMENTO
         document.getElementById('fuelForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             mostrarLoader("⛽ Gravando abastecimento na planilha...");
@@ -754,24 +771,75 @@
             }
         });
 
-        // ATUALIZAR INTERFACE (Tabelas, Filtros e Painéis)
+        // EXCLUSÃO DE ROTA
+        async function deletarRota(index, date, platform) {
+            if (!confirm(`Deseja realmente apagar a rota de ${platform} na data ${formatarData(date)}?`)) return;
+
+            mostrarLoader("🗑️ Removendo rota...");
+
+            const payload = {
+                action: "deletarRota",
+                data: { index, date, platform }
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                setTimeout(carregarDadosDaPlanilha, 1500);
+            } catch (error) {
+                ocultarLoader();
+                alert("Erro ao excluir rota.");
+                console.error(error);
+            }
+        }
+
+        // EXCLUSÃO DE ABASTECIMENTO
+        async function deletarAbastecimento(index, date) {
+            if (!confirm(`Deseja realmente apagar o abastecimento de ${formatarData(date)}?`)) return;
+
+            mostrarLoader("🗑️ Removendo abastecimento...");
+
+            const payload = {
+                action: "deletarAbastecimento",
+                data: { index, date }
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                setTimeout(carregarDadosDaPlanilha, 1500);
+            } catch (error) {
+                ocultarLoader();
+                alert("Erro ao excluir abastecimento.");
+                console.error(error);
+            }
+        }
+
+        // ATUALIZAR INTERFACE
         function atualizarTela() {
             const mesSel = document.getElementById('filtroMes').value;
             const anoSel = document.getElementById('filtroAno').value;
 
-            // Filtra as rotas pelo mês e ano selecionados
             const rotasFiltradas = rotas.filter(r => {
                 const partes = r.date.split('-');
                 return partes[0] === anoSel && partes[1] === mesSel;
             });
 
-            // Filtra os abastecimentos pelo mês e ano selecionados
             const abastFiltrados = abastecimentos.filter(a => {
                 const partes = a.date.split('-');
                 return partes[0] === anoSel && partes[1] === mesSel;
             });
 
-            // Calcula indicadores do Dashboard
             let faturamentoBruto = 0;
             let totalKmNoMes = 0;
             rotasFiltradas.forEach(r => {
@@ -789,7 +857,6 @@
             let lucroLiquido = faturamentoBruto - custoCombustivel;
             let mediaConsumo = totalLitrosNoMes > 0 ? (totalKmNoMes / totalLitrosNoMes) : 0;
 
-            // Renderiza no HTML
             document.getElementById('resumoBruto').innerText = faturamentoBruto.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('resumoGastos').innerText = custoCombustivel.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('resumoLiquido').innerText = lucroLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -801,10 +868,10 @@
             const tbodyRotas = document.getElementById('routeTableBody');
             tbodyRotas.innerHTML = '';
             if (rotasFiltradas.length === 0) {
-                tbodyRotas.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Nenhuma rota encontrada neste período.</td></tr>';
+                tbodyRotas.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Nenhuma rota encontrada neste período.</td></tr>';
             } else {
-                rotasFiltradas.forEach(r => {
-                    const badgeClass = r.platform === 'Amazon' ? 'badge-amazon' : 'badge-ml';
+                rotasFiltradas.forEach((r, idx) => {
+                    const badgeClass = r.platform === 'Uber' ? 'badge-uber' : 'badge-ml';
                     tbodyRotas.innerHTML += `
                         <tr>
                             <td><b>${formatarData(r.date)}</b></td>
@@ -813,6 +880,9 @@
                             <td>${r.km.toFixed(1)} km</td>
                             <td>${r.stops} un</td>
                             <td>${r.hours.toFixed(1)}h</td>
+                            <td>
+                                <button class="btn-delete" onclick="deletarRota(${idx}, '${r.date}', '${r.platform}')">Apagar</button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -822,14 +892,17 @@
             const tbodyAbast = document.getElementById('fuelTableBody');
             tbodyAbast.innerHTML = '';
             if (abastFiltrados.length === 0) {
-                tbodyAbast.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Nenhum abastecimento encontrado.</td></tr>';
+                tbodyAbast.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Nenhum abastecimento encontrado.</td></tr>';
             } else {
-                abastFiltrados.forEach(a => {
+                abastFiltrados.forEach((a, idx) => {
                     tbodyAbast.innerHTML += `
                         <tr>
                             <td><b>${formatarData(a.date)}</b></td>
                             <td>R$ ${a.fuelValue.toFixed(2)}</td>
                             <td>${a.liters.toFixed(2)} L</td>
+                            <td>
+                                <button class="btn-delete" onclick="deletarAbastecimento(${idx}, '${a.date}')">Apagar</button>
+                            </td>
                         </tr>
                     `;
                 });
