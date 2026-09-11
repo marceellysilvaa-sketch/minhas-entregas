@@ -635,6 +635,44 @@
             botao.disabled = isDisabled;
         }
 
+        // Exemplo de função para chamar no evento 'submit' do seu formulário
+function enviarEntregaParaExcel(event) {
+  event.preventDefault(); // Impede o recarregamento da página
+
+  // Monte o objeto conforme os campos do seu formulário
+  const dadosEntrega = {
+    data_hora: new Date().toLocaleString("pt-BR"),
+    cliente: document.getElementById("cliente").value,
+    endereco: document.getElementById("endereco").value,
+    status: document.getElementById("status").value,
+    observacao: document.getElementById("observacao").value
+  };
+
+  // Envia os dados para o seu servidor local Python
+  fetch("http://localhost:5000/api/salvar-entrega", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(dadosEntrega)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("Erro na resposta do servidor");
+    }
+    return response.json();
+  })
+  .then(data => {
+    alert("Entrega gravada com sucesso no Excel do seu computador!");
+    // Limpar o formulário se desejar
+    document.getElementById("meuFormulario").reset();
+  })
+  .catch(error => {
+    console.error("Erro ao enviar:", error);
+    alert("Não foi possível conectar ao servidor local. Verifique se o script Python está rodando no seu PC.");
+  });
+}
+
         async function carregarDados() {
             mostrarLoader("🔄 Carregando dados...");
             try {
