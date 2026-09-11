@@ -32,7 +32,45 @@
             padding-bottom: 40px;
         }
 
-        /* Header Mercado Livre */
+        /* Modal / Overlay de Login */
+        #loginOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--ml-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .login-card {
+            background: var(--ml-card-bg);
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-top: 6px solid var(--ml-yellow);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .login-header h2 {
+            color: var(--ml-blue);
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            font-size: 13px;
+            color: var(--ml-gray);
+            margin-top: 5px;
+        }
+
+        /* Header Principal */
         header {
             background-color: var(--ml-yellow);
             padding: 15px 20px;
@@ -45,15 +83,26 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .header-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--ml-blue);
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .user-badge {
+            background-color: var(--ml-blue);
+            color: #FFF;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .container {
@@ -62,7 +111,7 @@
             padding: 0 15px;
         }
 
-        /* Card Padrao ML */
+        /* Cards Padrão */
         .card {
             background: var(--ml-card-bg);
             border-radius: 6px;
@@ -78,9 +127,12 @@
             margin-bottom: 15px;
             border-bottom: 2px solid var(--ml-yellow);
             padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Forms e Inputs */
+        /* Formulários */
         .grid-form {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -91,6 +143,7 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
+            margin-bottom: 12px;
         }
 
         label {
@@ -120,6 +173,7 @@
             cursor: pointer;
             transition: background 0.2s;
             font-size: 14px;
+            width: 100%;
         }
 
         .btn-primary {
@@ -131,12 +185,50 @@
             background-color: var(--ml-blue-hover);
         }
 
-        .btn-delete {
+        .btn-report {
+            background-color: var(--ml-green);
+            color: #FFF;
+            border: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-report:hover {
+            background-color: #008a43;
+        }
+
+        .btn-logout {
             background-color: transparent;
+            color: var(--ml-blue);
+            border: 1px solid var(--ml-blue);
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: auto;
+        }
+
+        .btn-logout:hover {
+            background-color: var(--ml-blue);
+            color: #FFF;
+        }
+
+        .btn-delete {
+            background-color: #FFF;
             color: var(--ml-red);
             border: 1px solid var(--ml-red);
             padding: 4px 8px;
             font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: auto;
+            font-weight: 500;
         }
 
         .btn-delete:hover {
@@ -147,7 +239,7 @@
         /* Dashboard Resumo */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
         }
 
@@ -193,7 +285,6 @@
             font-weight: 500;
         }
 
-        /* Badges */
         .badge {
             padding: 4px 8px;
             border-radius: 12px;
@@ -204,7 +295,6 @@
         .badge-ml { background-color: #FFF159; color: #2D3277; }
         .badge-uber { background-color: #000; color: #FFF; }
 
-        /* Modal Overlay */
         #loadingOverlay {
             display: none;
             position: fixed;
@@ -216,171 +306,289 @@
             font-size: 18px;
             z-index: 1000;
         }
+
+        /* Estilos de Impressao / Relatorio */
+        @media print {
+            body {
+                background-color: #FFF;
+                color: #000;
+                padding: 0;
+            }
+            #loginOverlay, header, .grid-form, .btn-delete, .btn-logout, .btn-report, #loadingOverlay {
+                display: none !important;
+            }
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #CCC;
+                page-break-inside: avoid;
+            }
+            .card-title {
+                border-bottom: 2px solid #000;
+            }
+        }
     </style>
 </head>
 <body>
 
+    <!-- Tela de Login -->
+    <div id="loginOverlay">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>📦 Acesso ao Sistema</h2>
+                <p>Digite seu usuário e senha para acessar</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Usuário</label>
+                    <select id="username" required>
+                        <option value="">Selecione quem está acessando...</option>
+                        <option value="MARCELLY">MARCELLY</option>
+                        <option value="SHERLEY">SHERLEY</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="password" placeholder="Sua senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Entrar no Painel</button>
+            </form>
+        </div>
+    </div>
+
     <div id="loadingOverlay">🔄 Carregando dados...</div>
 
-    <header>
-        <div class="header-content">
-            <div class="header-title">
-                📦 Painel de Controle de Entregas
+    <!-- Conteúdo Principal -->
+    <div id="mainContent" style="display: none;">
+        <header>
+            <div class="header-content">
+                <div class="header-title">
+                    📦 Painel de Controle
+                    <span class="user-badge" id="usuarioLogadoBadge">Usuário</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div>
+                        <select id="filtroMes" onchange="atualizarTela()"></select>
+                        <select id="filtroAno" onchange="atualizarTela()"></select>
+                    </div>
+                    <button class="btn-report" onclick="gerarRelatorioMensal()">📄 Gerar Relatório</button>
+                    <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+                </div>
             </div>
-            <div>
-                <label style="color: var(--ml-blue); font-weight: 500;">Filtro:</label>
-                <select id="filtroMes" onchange="atualizarTela()"></select>
-                <select id="filtroAno" onchange="atualizarTela()"></select>
-            </div>
-        </div>
-    </header>
+        </header>
 
-    <div class="container">
-        
-        <!-- Dashboard / Métricas -->
-        <div class="card">
-            <div class="card-title">Resumo Financeiro e Desempenho</div>
-            <div class="dashboard-grid">
-                <div class="dash-card green">
-                    <span>Faturamento Bruto</span>
-                    <h3 id="resumoBruto">R$ 0,00</h3>
-                </div>
-                <div class="dash-card red">
-                    <span>Custo Combustível</span>
-                    <h3 id="resumoGastos">R$ 0,00</h3>
-                </div>
-                <div class="dash-card green">
-                    <span>Lucro Líquido</span>
-                    <h3 id="resumoLiquido">R$ 0,00</h3>
-                </div>
-                <div class="dash-card">
-                    <span>Média Consumo</span>
-                    <h3 id="resumoKML">0.0 km/l</h3>
-                </div>
-                <div class="dash-card">
-                    <span>Total Percorrido</span>
-                    <h3 id="totalKM">0 km</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formulários em Paralelo -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+        <div class="container">
             
-            <!-- Cadastro de Rota -->
+            <!-- Dashboard Resumo -->
             <div class="card">
-                <div class="card-title">Registrar Rota</div>
-                <form id="routeForm" class="grid-form">
-                    <div class="form-group">
-                        <label>Plataforma</label>
-                        <select id="platform" required onchange="gerenciarCamposRota()">
-                            <option value="">Selecione...</option>
-                            <option value="Mercado Livre">Mercado Livre</option>
-                            <option value="Uber">Uber / Outros</option>
-                        </select>
+                <div class="card-title">
+                    <span>Resumo Financeiro e Desempenho</span>
+                    <span id="tituloMesAnoRelatorio" style="font-size: 14px; font-weight: normal; color: var(--ml-gray);"></span>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="dash-card green">
+                        <span>Faturamento Bruto</span>
+                        <h3 id="resumoBruto">R$ 0,00</h3>
                     </div>
-                    <div class="form-group">
-                        <label>Data</label>
-                        <input type="date" id="routeDate" required disabled>
+                    <div class="dash-card red">
+                        <span>Custo Combustível</span>
+                        <h3 id="resumoGastos">R$ 0,00</h3>
                     </div>
-                    <div class="form-group">
-                        <label>Valor (R$)</label>
-                        <input type="number" step="0.01" id="value" placeholder="0,00" required disabled>
+                    <div class="dash-card green">
+                        <span>Lucro Líquido</span>
+                        <h3 id="resumoLiquido">R$ 0,00</h3>
                     </div>
-                    <div class="form-group">
-                        <label>KM Rodado</label>
-                        <input type="number" step="0.1" id="km" placeholder="0.0" required disabled>
+                    <div class="dash-card">
+                        <span>Média Consumo</span>
+                        <h3 id="resumoKML">0.0 km/l</h3>
                     </div>
-                    <div class="form-group">
-                        <label>Paradas / Pacotes</label>
-                        <input type="number" id="stops" placeholder="0" required disabled>
+                    <div class="dash-card">
+                        <span>Total Percorrido</span>
+                        <h3 id="totalKM">0 km</h3>
                     </div>
-                    <div class="form-group">
-                        <label>Horas Trabalhadas</label>
-                        <input type="number" step="0.1" id="hours" placeholder="0.0" required disabled>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1;">
-                        <button type="submit" id="btnSalvarRota" class="btn btn-primary" disabled>Salvar Rota</button>
-                    </div>
-                </form>
+                </div>
             </div>
 
-            <!-- Cadastro de Abastecimento -->
+            <!-- Formulários -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                
+                <!-- Cadastro de Rota -->
+                <div class="card">
+                    <div class="card-title">Registrar Rota</div>
+                    <form id="routeForm" class="grid-form">
+                        <div class="form-group">
+                            <label>Plataforma</label>
+                            <select id="platform" required onchange="gerenciarCamposRota()">
+                                <option value="">Selecione...</option>
+                                <option value="Mercado Livre">Mercado Livre</option>
+                                <option value="Uber">Uber / Outros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="routeDate" required disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor (R$)</label>
+                            <input type="number" step="0.01" id="value" placeholder="0,00" required disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>KM Rodado</label>
+                            <input type="number" step="0.1" id="km" placeholder="0.0" required disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Paradas / Pacotes</label>
+                            <input type="number" id="stops" placeholder="0" required disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Horas Trabalhadas</label>
+                            <input type="number" step="0.1" id="hours" placeholder="0.0" required disabled>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <button type="submit" id="btnSalvarRota" class="btn btn-primary" disabled>Salvar Rota</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Cadastro de Abastecimento -->
+                <div class="card">
+                    <div class="card-title">Registrar Abastecimento</div>
+                    <form id="fuelForm" class="grid-form">
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="fuelDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Preço/L (R$)</label>
+                            <input type="number" step="0.01" id="pricePerLiter" value="6.28" required oninput="calcularCombustivel('preco')">
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Total (R$)</label>
+                            <input type="number" step="0.01" id="fuelValue" placeholder="0,00" required oninput="calcularCombustivel('total')">
+                        </div>
+                        <div class="form-group">
+                            <label>Litros Abastecidos</label>
+                            <input type="number" step="0.01" id="liters" placeholder="0.00" required oninput="calcularCombustivel('litros')">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1; margin-top: 10px;">
+                            <button type="submit" class="btn btn-primary">Salvar Abastecimento</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+            <!-- Histórico de Rotas -->
             <div class="card">
-                <div class="card-title">Registrar Abastecimento</div>
-                <form id="fuelForm" class="grid-form">
-                    <div class="form-group">
-                        <label>Data</label>
-                        <input type="date" id="fuelDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Valor Total (R$)</label>
-                        <input type="number" step="0.01" id="fuelValue" placeholder="0,00" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Litros Abastecidos</label>
-                        <input type="number" step="0.01" id="liters" placeholder="0.00" required>
-                    </div>
-                    <div class="form-group" style="grid-column: 1 / -1; margin-top: 25px;">
-                        <button type="submit" class="btn btn-primary">Salvar Abastecimento</button>
-                    </div>
-                </form>
+                <div class="card-title">Histórico de Rotas</div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Plataforma</th>
+                                <th>Valor</th>
+                                <th>KM</th>
+                                <th>Paradas</th>
+                                <th>Horas</th>
+                                <th>Opções</th>
+                            </tr>
+                        </thead>
+                        <tbody id="routeTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Histórico de Abastecimentos -->
+            <div class="card">
+                <div class="card-title">Histórico de Abastecimentos</div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Preço/L</th>
+                                <th>Valor Total</th>
+                                <th>Litros</th>
+                                <th>Opções</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fuelTableBody"></tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
-
-        <!-- Tabelas de Histórico -->
-        <div class="card">
-            <div class="card-title">Histórico de Rotas</div>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Plataforma</th>
-                            <th>Valor</th>
-                            <th>KM</th>
-                            <th>Paradas</th>
-                            <th>Horas</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="routeTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">Histórico de Abastecimentos</div>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Valor Total</th>
-                            <th>Litros</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="fuelTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // CONFIGURAÇÃO DA API (Roda localmente com Node.js ou Google Apps Script)
-        const API_URL = "http://localhost:3000/api"; // Mude para URL da sua API Local ou Google Script
+        const API_URL = "http://localhost:3000/api";
 
+        const USUARIOS_VALIDOS = {
+            "MARCELLY": "1234",
+            "SHERLEY": "1234"
+        };
+
+        let usuarioAtual = "";
         let rotas = [];
         let abastecimentos = [];
 
-        // Inicialização dos Seletores de Data
+        // Lógica de Login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if (USUARIOS_VALIDOS[user] && USUARIOS_VALIDOS[user] === pass) {
+                usuarioAtual = user;
+                document.getElementById('usuarioLogadoBadge').innerText = user;
+                document.getElementById('loginOverlay').style.display = "none";
+                document.getElementById('mainContent').style.display = "block";
+                
+                inicializarFiltros();
+                carregarDados();
+            } else {
+                alert("Usuário ou senha incorretos!");
+            }
+        });
+
+        function fazerLogout() {
+            usuarioAtual = "";
+            document.getElementById('loginForm').reset();
+            document.getElementById('mainContent').style.display = "none";
+            document.getElementById('loginOverlay').style.display = "flex";
+        }
+
+        // Cálculo automático de valor x litros
+        function calcularCombustivel(origem) {
+            const preco = parseFloat(document.getElementById('pricePerLiter').value) || 0;
+            const valorTotal = parseFloat(document.getElementById('fuelValue').value) || 0;
+            const litros = parseFloat(document.getElementById('liters').value) || 0;
+
+            if (preco <= 0) return;
+
+            if (origem === 'total' || origem === 'preco') {
+                if (valorTotal > 0) {
+                    document.getElementById('liters').value = (valorTotal / preco).toFixed(2);
+                }
+            } else if (origem === 'litros') {
+                if (litros > 0) {
+                    document.getElementById('fuelValue').value = (litros * preco).toFixed(2);
+                }
+            }
+        }
+
         function inicializarFiltros() {
             const mesSel = document.getElementById('filtroMes');
             const anoSel = document.getElementById('filtroAno');
             const hoje = new Date();
+
+            mesSel.innerHTML = "";
+            anoSel.innerHTML = "";
 
             const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             meses.forEach((mes, idx) => {
@@ -438,18 +646,19 @@
 
                 atualizarTela();
             } catch (error) {
-                console.error("Erro ao carregar dados localmente:", error);
+                console.error("Erro ao carregar dados:", error);
             } finally {
                 ocultarLoader();
             }
         }
 
-        // Submissão de Rota
+        // Submissão Rota
         document.getElementById('routeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             mostrarLoader("🚀 Salvando rota...");
 
             const payload = {
+                usuario: usuarioAtual,
                 date: document.getElementById('routeDate').value,
                 platform: document.getElementById('platform').value,
                 value: parseFloat(document.getElementById('value').value),
@@ -469,13 +678,15 @@
             carregarDados();
         });
 
-        // Submissão de Abastecimento
+        // Submissão Abastecimento
         document.getElementById('fuelForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             mostrarLoader("⛽ Salvando abastecimento...");
 
             const payload = {
+                usuario: usuarioAtual,
                 date: document.getElementById('fuelDate').value,
+                pricePerLiter: parseFloat(document.getElementById('pricePerLiter').value),
                 fuelValue: parseFloat(document.getElementById('fuelValue').value),
                 liters: parseFloat(document.getElementById('liters').value)
             };
@@ -487,11 +698,13 @@
             });
 
             document.getElementById('fuelForm').reset();
+            document.getElementById('pricePerLiter').value = "6.28";
             carregarDados();
         });
 
+        // Função de Apagar Rota
         async function deletarRota(index) {
-            if (!confirm("Tem certeza que deseja apagar esta rota?")) return;
+            if (!confirm("⚠️ Tem certeza que deseja apagar esta rota do histórico?")) return;
             mostrarLoader("🗑️ Deletando...");
             await fetch(`${API_URL}/deletar-rota`, {
                 method: 'POST',
@@ -501,8 +714,9 @@
             carregarDados();
         }
 
+        // Função de Apagar Abastecimento
         async function deletarAbastecimento(index) {
-            if (!confirm("Tem certeza que deseja apagar este abastecimento?")) return;
+            if (!confirm("⚠️ Tem certeza que deseja apagar este abastecimento do histórico?")) return;
             mostrarLoader("🗑️ Deletando...");
             await fetch(`${API_URL}/deletar-abastecimento`, {
                 method: 'POST',
@@ -512,9 +726,17 @@
             carregarDados();
         }
 
+        // Função para Gerar Relatório Mensal
+        function gerarRelatorioMensal() {
+            window.print();
+        }
+
         function atualizarTela() {
             const mesSel = document.getElementById('filtroMes').value;
             const anoSel = document.getElementById('filtroAno').value;
+            const mesNome = document.getElementById('filtroMes').options[document.getElementById('filtroMes').selectedIndex].text;
+
+            document.getElementById('tituloMesAnoRelatorio').innerText = `Período: ${mesNome} / ${anoSel}`;
 
             const rotasFiltradas = rotas.filter(r => {
                 const partes = r.date.split('-');
@@ -544,7 +766,7 @@
             // Tabela Rotas
             const tbodyRotas = document.getElementById('routeTableBody');
             tbodyRotas.innerHTML = rotasFiltradas.length === 0 
-                ? '<tr><td colspan="7" style="text-align:center;">Nenhuma rota cadastrada.</td></tr>'
+                ? '<tr><td colspan="7" style="text-align:center;">Nenhuma rota cadastrada neste mês.</td></tr>'
                 : rotasFiltradas.map(r => `
                     <tr>
                         <td><b>${formatarData(r.date)}</b></td>
@@ -553,29 +775,24 @@
                         <td>${r.km.toFixed(1)} km</td>
                         <td>${r.stops}</td>
                         <td>${r.hours.toFixed(1)}h</td>
-                        <td><button class="btn btn-delete" onclick="deletarRota(${r.originalIndex})">Apagar</button></td>
+                        <td><button class="btn-delete" onclick="deletarRota(${r.originalIndex})">🗑️ Apagar</button></td>
                     </tr>
                 `).join('');
 
             // Tabela Abastecimentos
             const tbodyAbast = document.getElementById('fuelTableBody');
             tbodyAbast.innerHTML = abastFiltrados.length === 0 
-                ? '<tr><td colspan="4" style="text-align:center;">Nenhum abastecimento cadastrado.</td></tr>'
+                ? '<tr><td colspan="5" style="text-align:center;">Nenhum abastecimento cadastrado neste mês.</td></tr>'
                 : abastFiltrados.map(a => `
                     <tr>
                         <td><b>${formatarData(a.date)}</b></td>
+                        <td>R$ ${(a.pricePerLiter || 6.28).toFixed(2)}</td>
                         <td>R$ ${a.fuelValue.toFixed(2)}</td>
                         <td>${a.liters.toFixed(2)} L</td>
-                        <td><button class="btn btn-delete" onclick="deletarAbastecimento(${a.originalIndex})">Apagar</button></td>
+                        <td><button class="btn-delete" onclick="deletarAbastecimento(${a.originalIndex})">🗑️ Apagar</button></td>
                     </tr>
                 `).join('');
         }
-
-        // Boot
-        window.onload = () => {
-            inicializarFiltros();
-            carregarDados();
-        };
     </script>
 </body>
 </html>
