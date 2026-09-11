@@ -185,6 +185,11 @@
             background-color: var(--ml-blue-hover);
         }
 
+        .btn-primary:disabled {
+            background-color: #CCCCCC;
+            cursor: not-allowed;
+        }
+
         .btn-report {
             background-color: var(--ml-green);
             color: #FFF;
@@ -635,44 +640,6 @@
             botao.disabled = isDisabled;
         }
 
-        // Exemplo de função para chamar no evento 'submit' do seu formulário
-function enviarEntregaParaExcel(event) {
-  event.preventDefault(); // Impede o recarregamento da página
-
-  // Monte o objeto conforme os campos do seu formulário
-  const dadosEntrega = {
-    data_hora: new Date().toLocaleString("pt-BR"),
-    cliente: document.getElementById("cliente").value,
-    endereco: document.getElementById("endereco").value,
-    status: document.getElementById("status").value,
-    observacao: document.getElementById("observacao").value
-  };
-
-  // Envia os dados para o seu servidor local Python
-  fetch("http://localhost:5000/api/salvar-entrega", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(dadosEntrega)
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error("Erro na resposta do servidor");
-    }
-    return response.json();
-  })
-  .then(data => {
-    alert("Entrega gravada com sucesso no Excel do seu computador!");
-    // Limpar o formulário se desejar
-    document.getElementById("meuFormulario").reset();
-  })
-  .catch(error => {
-    console.error("Erro ao enviar:", error);
-    alert("Não foi possível conectar ao servidor local. Verifique se o script Python está rodando no seu PC.");
-  });
-}
-
         async function carregarDados() {
             mostrarLoader("🔄 Carregando dados...");
             try {
@@ -705,15 +672,24 @@ function enviarEntregaParaExcel(event) {
                 hours: parseFloat(document.getElementById('hours').value)
             };
 
-            await fetch(`${API_URL}/salvar-rota`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            try {
+                const response = await fetch(`${API_URL}/salvar-rota`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-            document.getElementById('routeForm').reset();
-            gerenciarCamposRota();
-            carregarDados();
+                if (!response.ok) throw new Error('Erro ao salvar rota.');
+
+                document.getElementById('routeForm').reset();
+                gerenciarCamposRota();
+                await carregarDados();
+            } catch (error) {
+                console.error("Erro ao enviar rota:", error);
+                alert("Não foi possível salvar a rota. Verifique a conexão com o servidor.");
+            } finally {
+                ocultarLoader();
+            }
         });
 
         // Submissão Abastecimento
@@ -729,39 +705,62 @@ function enviarEntregaParaExcel(event) {
                 liters: parseFloat(document.getElementById('liters').value)
             };
 
-            await fetch(`${API_URL}/salvar-abastecimento`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            try {
+                const response = await fetch(`${API_URL}/salvar-abastecimento`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-            document.getElementById('fuelForm').reset();
-            document.getElementById('pricePerLiter').value = "6.28";
-            carregarDados();
+                if (!response.ok) throw new Error('Erro ao salvar abastecimento.');
+
+                document.getElementById('fuelForm').reset();
+                document.getElementById('pricePerLiter').value = "6.28";
+                await carregarDados();
+            } catch (error) {
+                console.error("Erro ao enviar abastecimento:", error);
+                alert("Não foi possível salvar o abastecimento. Verifique a conexão com o servidor.");
+            } finally {
+                ocultarLoader();
+            }
         });
 
         // Função de Apagar Rota
         async function deletarRota(index) {
             if (!confirm("⚠️ Tem certeza que deseja apagar esta rota do histórico?")) return;
             mostrarLoader("🗑️ Deletando...");
-            await fetch(`${API_URL}/deletar-rota`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index })
-            });
-            carregarDados();
+            try {
+                await fetch(`${API_URL}/deletar-rota`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index })
+                });
+                await carregarDados();
+            } catch (error) {
+                console.error("Erro ao apagar rota:", error);
+                alert("Erro ao excluir registro.");
+            } finally {
+                ocultarLoader();
+            }
         }
 
         // Função de Apagar Abastecimento
         async function deletarAbastecimento(index) {
             if (!confirm("⚠️ Tem certeza que deseja apagar este abastecimento do histórico?")) return;
             mostrarLoader("🗑️ Deletando...");
-            await fetch(`${API_URL}/deletar-abastecimento`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index })
-            });
-            carregarDados();
+            try {
+                await fetch(`${API_URL}/deletar-abastecimento`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index })
+                });
+                await carregarDados();
+            } catch (error) {
+                console.error("Erro ao apagar abastecimento:", error);
+                alert("Erro ao excluir registro.");
+            } finally {
+                ocultarLoader();
+            }
         }
 
         // Função para Gerar Relatório Mensal
@@ -777,20 +776,22 @@ function enviarEntregaParaExcel(event) {
             document.getElementById('tituloMesAnoRelatorio').innerText = `Período: ${mesNome} / ${anoSel}`;
 
             const rotasFiltradas = rotas.filter(r => {
+                if (!r.date) return false;
                 const partes = r.date.split('-');
                 return partes[0] === anoSel && partes[1] === mesSel;
             });
 
             const abastFiltrados = abastecimentos.filter(a => {
+                if (!a.date) return false;
                 const partes = a.date.split('-');
                 return partes[0] === anoSel && partes[1] === mesSel;
             });
 
             let faturamentoBruto = 0, totalKmNoMes = 0;
-            rotasFiltradas.forEach(r => { faturamentoBruto += r.value; totalKmNoMes += r.km; });
+            rotasFiltradas.forEach(r => { faturamentoBruto += (r.value || 0); totalKmNoMes += (r.km || 0); });
 
             let custoCombustivel = 0, totalLitrosNoMes = 0;
-            abastFiltrados.forEach(a => { custoCombustivel += a.fuelValue; totalLitrosNoMes += a.liters; });
+            abastFiltrados.forEach(a => { custoCombustivel += (a.fuelValue || 0); totalLitrosNoMes += (a.liters || 0); });
 
             let lucroLiquido = faturamentoBruto - custoCombustivel;
             let mediaConsumo = totalLitrosNoMes > 0 ? (totalKmNoMes / totalLitrosNoMes) : 0;
@@ -809,10 +810,10 @@ function enviarEntregaParaExcel(event) {
                     <tr>
                         <td><b>${formatarData(r.date)}</b></td>
                         <td><span class="badge ${r.platform === 'Mercado Livre' ? 'badge-ml' : 'badge-uber'}">${r.platform}</span></td>
-                        <td>R$ ${r.value.toFixed(2)}</td>
-                        <td>${r.km.toFixed(1)} km</td>
-                        <td>${r.stops}</td>
-                        <td>${r.hours.toFixed(1)}h</td>
+                        <td>R$ ${(r.value || 0).toFixed(2)}</td>
+                        <td>${(r.km || 0).toFixed(1)} km</td>
+                        <td>${r.stops || 0}</td>
+                        <td>${(r.hours || 0).toFixed(1)}h</td>
                         <td><button class="btn-delete" onclick="deletarRota(${r.originalIndex})">🗑️ Apagar</button></td>
                     </tr>
                 `).join('');
@@ -825,8 +826,8 @@ function enviarEntregaParaExcel(event) {
                     <tr>
                         <td><b>${formatarData(a.date)}</b></td>
                         <td>R$ ${(a.pricePerLiter || 6.28).toFixed(2)}</td>
-                        <td>R$ ${a.fuelValue.toFixed(2)}</td>
-                        <td>${a.liters.toFixed(2)} L</td>
+                        <td>R$ ${(a.fuelValue || 0).toFixed(2)}</td>
+                        <td>${(a.liters || 0).toFixed(2)} L</td>
                         <td><button class="btn-delete" onclick="deletarAbastecimento(${a.originalIndex})">🗑️ Apagar</button></td>
                     </tr>
                 `).join('');
