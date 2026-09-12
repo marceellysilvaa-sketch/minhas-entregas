@@ -825,7 +825,7 @@
                 : abastFiltrados.map(a => `
                     <tr>
                         <td><b>${formatarData(a.date)}</b></td>
-                        <td>R$ ${(a.pricePerLiter || 6.28).toFixed(2)}</td>
+                        <td>R$ ${(a.pricePerLiter || 0).toFixed(2)}</td>
                         <td>R$ ${(a.fuelValue || 0).toFixed(2)}</td>
                         <td>${(a.liters || 0).toFixed(2)} L</td>
                         <td><button class="btn-delete" onclick="deletarAbastecimento(${a.originalIndex})">🗑️ Apagar</button></td>
