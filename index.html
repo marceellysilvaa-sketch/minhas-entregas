@@ -336,6 +336,326 @@
                 border-bottom: 2px solid #000;
             }
         }
+    
+        /* ===== REDESIGN VISUAL ===== */
+        :root {
+            --ml-yellow: #ffe600;
+            --ml-blue: #2d3277;
+            --ml-blue-hover: #20245d;
+            --ml-bg: #f5f7fb;
+            --ml-card-bg: #ffffff;
+            --ml-text: #1f2937;
+            --ml-gray: #667085;
+            --ml-light-gray: #eaecf0;
+            --ml-green: #00a650;
+            --ml-red: #f04438;
+            --ml-shadow: 0 10px 30px rgba(31, 41, 55, .07);
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 15% 0%, rgba(255,230,0,.12), transparent 25%),
+                linear-gradient(180deg, #f8fafc 0%, #f3f5f9 100%);
+            color: var(--ml-text);
+        }
+
+        #loginOverlay {
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255,230,0,.25), transparent 30%),
+                linear-gradient(135deg, #f8fafc, #eef1f7);
+        }
+
+        .login-card {
+            max-width: 410px;
+            padding: 36px;
+            border: 1px solid rgba(45,50,119,.08);
+            border-top: 6px solid var(--ml-yellow);
+            border-radius: 18px;
+            box-shadow: 0 24px 60px rgba(45,50,119,.14);
+        }
+
+        .login-header h2 {
+            font-size: 25px;
+            letter-spacing: -.4px;
+        }
+
+        .login-header p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            background: rgba(255,230,0,.94);
+            backdrop-filter: blur(12px);
+            padding: 14px 20px;
+            box-shadow: 0 3px 18px rgba(45,50,119,.10);
+        }
+
+        .header-content {
+            max-width: 1180px;
+        }
+
+        .header-title {
+            font-size: 21px;
+            letter-spacing: -.3px;
+        }
+
+        .user-badge {
+            padding: 5px 11px;
+            box-shadow: 0 2px 7px rgba(45,50,119,.12);
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 28px auto;
+        }
+
+        .card {
+            border: 1px solid rgba(16,24,40,.06);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: var(--ml-shadow);
+        }
+
+        .card-title {
+            font-size: 18px;
+            margin-bottom: 18px;
+            border-bottom: 0;
+            padding-bottom: 12px;
+            position: relative;
+        }
+
+        .card-title::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 48px;
+            height: 3px;
+            border-radius: 99px;
+            background: var(--ml-yellow);
+        }
+
+        .dashboard-grid {
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+        }
+
+        .dash-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 104px;
+            background: linear-gradient(145deg, #fff, #f9fafb);
+            border: 1px solid #eef0f3;
+            border-left: 4px solid var(--ml-blue);
+            border-radius: 12px;
+            padding: 17px;
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 9px 24px rgba(16,24,40,.08);
+        }
+
+        .dash-card.green { border-left-color: var(--ml-green); }
+        .dash-card.red { border-left-color: var(--ml-red); }
+
+        .dash-card span {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .55px;
+        }
+
+        .dash-card h3 {
+            font-size: 23px;
+            margin-top: 9px;
+            letter-spacing: -.5px;
+        }
+
+        .grid-form {
+            gap: 13px;
+        }
+
+        .form-group {
+            gap: 7px;
+            margin-bottom: 8px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .15px;
+        }
+
+        input, select {
+            min-height: 42px;
+            padding: 10px 12px;
+            border: 1px solid #d0d5dd;
+            border-radius: 9px;
+            background: #fff;
+            transition: border .18s, box-shadow .18s;
+        }
+
+        input:hover, select:hover {
+            border-color: #98a2b3;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--ml-blue);
+            box-shadow: 0 0 0 3px rgba(45,50,119,.10);
+        }
+
+        .btn {
+            min-height: 42px;
+            border-radius: 9px;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(45,50,119,.12);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--ml-blue), #4249a0);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--ml-blue-hover), #343a85);
+            transform: translateY(-1px);
+        }
+
+        .btn-report {
+            min-height: 36px;
+            border-radius: 8px;
+            box-shadow: 0 3px 9px rgba(0,166,80,.18);
+        }
+
+        .btn-delete {
+            border-radius: 7px;
+            transition: all .18s;
+        }
+
+        table {
+            margin-top: 4px;
+        }
+
+        th, td {
+            padding: 13px 12px;
+            border-bottom: 1px solid #eef0f3;
+        }
+
+        th {
+            background: #f8fafc;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        tbody tr {
+            transition: background .15s;
+        }
+
+        tbody tr:hover {
+            background: #fafbfc;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,.05);
+        }
+
+        #loadingOverlay {
+            backdrop-filter: blur(3px);
+        }
+
+        @media (max-width: 1050px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 720px) {
+            header {
+                position: relative;
+                padding: 12px 14px;
+            }
+
+            .header-content {
+                align-items: stretch;
+            }
+
+            .header-title {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .header-content > div:last-child {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .header-content > div:last-child > div {
+                display: flex;
+                width: 100%;
+            }
+
+            .header-content select {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .btn-report {
+                flex: 1;
+            }
+
+            .container {
+                margin: 16px auto;
+                padding: 0 10px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .dash-card {
+                min-height: 96px;
+                padding: 14px;
+            }
+
+            .dash-card h3 {
+                font-size: 19px;
+            }
+
+            .grid-form {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                min-width: 680px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .login-card {
+                margin: 16px;
+                padding: 27px 22px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -344,8 +664,8 @@
     <div id="loginOverlay">
         <div class="login-card">
             <div class="login-header">
-                <h2>📦 Acesso ao Sistema</h2>
-                <p>Digite seu usuário e senha para acessar</p>
+                <h2>📦 Acesso ao Painel</h2>
+                <p>Entre para gerenciar suas rotas e abastecimentos</p>
             </div>
             <form id="loginForm">
                 <div class="form-group">
@@ -372,7 +692,7 @@
         <header>
             <div class="header-content">
                 <div class="header-title">
-                    📦 Painel de Controle
+                    <span>📦 Painel de Controle</span>
                     <span class="user-badge" id="usuarioLogadoBadge">Usuário</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -528,10 +848,13 @@
             </div>
 
         </div>
+        <div style="text-align:center; color:#98a2b3; font-size:12px; padding:2px 0 20px;">
+            Painel local • Seus dados ficam armazenados neste computador
+        </div>
     </div>
 
     <script>
-        const API_URL = "http://localhost:5000/api";
+        const API_URL = "/api";
 
         const USUARIOS_VALIDOS = {
             "MARCELLY": "1234",
@@ -585,6 +908,16 @@
                     document.getElementById('fuelValue').value = (litros * preco).toFixed(2);
                 }
             }
+        }
+
+        function definirDatasPadrao() {
+            const hoje = new Date();
+            const iso = new Date(hoje.getTime() - hoje.getTimezoneOffset() * 60000)
+                .toISOString().slice(0, 10);
+            if (!document.getElementById('routeDate').value)
+                document.getElementById('routeDate').value = iso;
+            if (!document.getElementById('fuelDate').value)
+                document.getElementById('fuelDate').value = iso;
         }
 
         function inicializarFiltros() {
@@ -644,14 +977,20 @@
             mostrarLoader("🔄 Carregando dados...");
             try {
                 const response = await fetch(`${API_URL}/dados`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const dados = await response.json();
 
-                rotas = (dados.rotas || []).map((r, index) => ({ ...r, originalIndex: index }));
-                abastecimentos = (dados.abastecimentos || []).map((a, index) => ({ ...a, originalIndex: index }));
+                rotas = Array.isArray(dados.rotas)
+                    ? dados.rotas.map((r, index) => ({ ...r, originalIndex: index }))
+                    : [];
+                abastecimentos = Array.isArray(dados.abastecimentos)
+                    ? dados.abastecimentos.map((a, index) => ({ ...a, originalIndex: index }))
+                    : [];
 
                 atualizarTela();
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
+                alert("Não foi possível carregar os dados. Verifique se o servidor está funcionando.");
             } finally {
                 ocultarLoader();
             }
@@ -730,11 +1069,12 @@
             if (!confirm("⚠️ Tem certeza que deseja apagar esta rota do histórico?")) return;
             mostrarLoader("🗑️ Deletando...");
             try {
-                await fetch(`${API_URL}/deletar-rota`, {
+                const response = await fetch(`${API_URL}/deletar-rota`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ index })
                 });
+                if (!response.ok) throw new Error('Erro ao excluir rota.');
                 await carregarDados();
             } catch (error) {
                 console.error("Erro ao apagar rota:", error);
@@ -749,11 +1089,12 @@
             if (!confirm("⚠️ Tem certeza que deseja apagar este abastecimento do histórico?")) return;
             mostrarLoader("🗑️ Deletando...");
             try {
-                await fetch(`${API_URL}/deletar-abastecimento`, {
+                const response = await fetch(`${API_URL}/deletar-abastecimento`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ index })
                 });
+                if (!response.ok) throw new Error('Erro ao excluir abastecimento.');
                 await carregarDados();
             } catch (error) {
                 console.error("Erro ao apagar abastecimento:", error);
